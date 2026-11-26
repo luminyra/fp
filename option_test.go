@@ -100,3 +100,15 @@ func TestOptionJSON(t *testing.T) {
 		t.Fatal("Unmarshal accepted a string for Option[int]")
 	}
 }
+
+func BenchmarkOptionChain(b *testing.B) {
+	env := map[string]string{"WORKERS": "8"}
+	parse := func(s string) Option[int] {
+		n, err := strconv.Atoi(s)
+		return OptionOf(n, err == nil)
+	}
+	for b.Loop() {
+		v, ok := env["WORKERS"]
+		sinkInt = OptionOf(v, ok).AndThen(parse).Map(func(n int) int { return n * 2 }).Or(1)
+	}
+}

@@ -86,3 +86,41 @@ func TestResultChain(t *testing.T) {
 		t.Error("Recover mismatch")
 	}
 }
+
+var (
+	sinkInt    int
+	sinkString string
+	sinkErr    error
+)
+
+func benchCheckPort(n int) (int, error) {
+	if n < 1 || n > 65535 {
+		return 0, fmt.Errorf("port %d out of range", n)
+	}
+	return n, nil
+}
+
+// BenchmarkResultChain compares a Result chain with the same steps written
+// as plain Go.
+func BenchmarkResultChain(b *testing.B) {
+	b.Run("plain", func(b *testing.B) {
+		for b.Loop() {
+			n, err := strconv.Atoi("8080")
+			if err == nil {
+				n, err = benchCheckPort(n)
+			}
+			if err == nil {
+				sinkString = ":" + strconv.Itoa(n)
+			}
+			sinkErr = err
+		}
+	})
+	b.Run("result", func(b *testing.B) {
+		for b.Loop() {
+			sinkString, sinkErr = ResultOf(strconv.Atoi("8080")).
+				AndThen(benchCheckPort).
+				Map(func(n int) string { return ":" + strconv.Itoa(n) }).
+				Get()
+		}
+	})
+}
