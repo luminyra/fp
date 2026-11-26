@@ -9,4 +9,6 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Added
 
 - `Option`, `Result` and `Either` with generic `Map`, `AndThen` and `Fold` methods, iterator and JSON support.
+- Benchmarks showing that chains cost the same as plain Go (`make bench`).
+- A Makefile with the development tasks (`make help`).
 - Requires Go 1.27 or later.
